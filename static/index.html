@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identifile — File Type Identifier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f7f8fb;
+      --surface: #ffffff;
+      --border: #e6e8f0;
+
+      --accent: #0ea5e9;
+      --accent2: #7b61ff;
+
+      --text: #0f172a;
+      --muted: #5b6475;
+
+      --danger: #e11d48;
+      --warn: #b45309;
+
+      --mono: 'Google Sans', sans-serif;
+      --sans: 'Google Sans', sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: none;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      margin-bottom: 48px;
+      text-align: center;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      color: var(--accent);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent);
+      opacity: .08;
+    }
+
+    h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .02em;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .brand {
+      font-family: var(--sans);
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .disclaimer {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+
+      background: #e6f2ff;
+      border: 1px solid #c7defa;
+      border-radius: 10px;
+
+      padding: 14px 18px;
+      margin-bottom: 32px;
+
+      font-family: var(--mono);
+      font-size: 14px;
+      color: #1e3a8a;
+
+      line-height: 1.6;
+    }
+
+    .disclaimer-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    #dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 56px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      background: var(--surface);
+      margin-bottom: 28px;
+    }
+
+    #dropzone:hover,
+    #dropzone.drag-over {
+      border-color: var(--accent);
+      background: rgba(0, 255, 200, .04);
+    }
+
+    #dropzone.drag-over {
+      box-shadow: 0 0 40px rgba(0, 255, 200, .1);
+    }
+
+    .drop-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      display: block;
+      opacity: .6;
+    }
+
+    .drop-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .drop-sub {
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .drop-btn {
+      margin-top: 20px;
+      display: inline-block;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: .8rem;
+      cursor: pointer;
+      transition: background .15s;
+      background: transparent;
+    }
+
+    .drop-btn:hover {
+      background: rgba(0, 255, 200, .1);
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 3px;
+      width: 0%;
+      transition: width .2s;
+      margin-bottom: 20px;
+    }
+
+    #clear-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: .78rem;
+      cursor: pointer;
+      margin-bottom: 24px;
+      transition: border-color .15s, color .15s;
+    }
+
+    #clear-btn:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    #summary {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    #results {
+      display: none;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      animation: slideIn .3s ease both;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, .02);
+    }
+
+    .card-filename {
+      font-weight: 700;
+      font-size: 1rem;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-size {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .card-body {
+      padding: 20px 22px;
+    }
+
+    .match {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+    }
+
+    .match:last-child {
+      border-bottom: none;
+    }
+
+    .match-badge {
+      grid-row: span 3;
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      align-self: start;
+    }
+
+    .match-type {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+
+    .match-desc {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .match-hex {
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: #4a4a6a;
+      margin-top: 6px;
+      letter-spacing: .05em;
+    }
+
+    .match-hex span {
+      color: var(--accent2);
+    }
+
+    .embedded-section {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: rgba(123, 97, 255, .06);
+      border: 1px solid rgba(123, 97, 255, .2);
+      border-radius: 10px;
+    }
+
+    .embedded-title {
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--accent2);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .embedded-item {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: #a0a0c0;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .embedded-item:last-child {
+      border-bottom: none;
+    }
+
+    .embedded-offset {
+      color: var(--accent2);
+      flex-shrink: 0;
+    }
+
+    .unknown-msg {
+      font-family: var(--mono);
+      font-size: .85rem;
+      color: var(--muted);
+      padding: 12px 0;
+    }
+
+    .unknown-hex {
+      margin-top: 10px;
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: #3a3a5a;
+      word-break: break-all;
+    }
+
+    .unknown-hex span {
+      color: var(--warn);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    footer {
+      text-align: center;
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: #2a2a4a;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header>
+      <div class="brand">Identifile</div>
+      <h1>File Type Identifier</h1>
+    </header>
+
+    <p class="desc">
+      Do you have a file that you are unsure of its extension or type? Identifile was made just for that.
+      It works by checking the file’s “magic number” — a unique signature stored in the file header —
+      to accurately identify what the file really is.
+      <br>
+      <br>
+      This tool can be used to detect unknown file types, file extension spoofing (e.g an .exe disguised as .jpg) and embedded files (one file hidden within another).
+    </p>
+    <br>
+
+    <div class="disclaimer">
+      <span class="disclaimer-icon">🛡️</span>
+      <div>
+        <ul>
+          <ul><strong>Disclaimer:</strong></ul>
+          <ul>Files are analysed server-side but never stored.</ul>
+          <ul>Only the first 256 KB of each file is read for analysis.</ul>
+          <ul>No data is written to disk.</ul>
+          <ul>As good practice, avoid uploading sensitive files to this tool or any other tool with similar functionalities.</ul>
+        </ul>
+      </div>
+    </div>
+
+    <div id="dropzone" role="button" tabindex="0" aria-label="Drop files here or click to select">
+      <span class="drop-icon">📁</span>
+      <div class="drop-title">Upload files here</div>
+      <div class="drop-sub">Supports drag and drop &bull; Upload multiple files at once</div>
+      <button class="drop-btn" onclick="document.getElementById('file-input').click(); event.stopPropagation();">Browse files</button>
+      <input type="file" id="file-input" multiple aria-hidden="true" />
+    </div>
+
+    <div class="progress-bar" id="progress"></div>
+    <button id="clear-btn" onclick="clearResults()">✕ Clear results</button>
+    <div id="summary"></div>
+    <div id="results" role="region" aria-live="polite"></div>
+
+    <footer>Copyright © 2026 Kang Industries.</footer>
+  </main>
+
+  <script>
+    const CHUNK_SIZE = 256 * 1024; 
+
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function fmtSize(n) {
+      if (n < 1024) return n + ' B';
+      if (n < 1024 ** 2) return (n / 1024).toFixed(1) + ' KB';
+      if (n < 1024 ** 3) return (n / 1024 ** 2).toFixed(2) + ' MB';
+      return (n / 1024 ** 3).toFixed(2) + ' GB';
+    }
+
+    const TYPE_COLORS = {
+      'PDF': '#e63946', 'PNG': '#2196f3', 'GIF': '#ff69b4', 'JPEG': '#3a86ff',
+      'MP4': '#8338ec', 'MP3': '#fb5607', 'FLAC': '#06d6a0', 'OGG': '#06d6a0',
+      'ZIP/OOXML': '#f77f00', 'RAR': '#f77f00', 'RAR5': '#f77f00', '7-ZIP': '#f77f00',
+      'GZIP': '#f77f00', 'BZIP2': '#f77f00', 'XZ': '#f77f00', 'ZSTD': '#f77f00', 'LZ4': '#f77f00',
+      'PE/EXE': '#ef233c', 'ELF': '#ef233c', 'MACH-O 32': '#ef233c', 'MACH-O 64': '#ef233c',
+      'BITCOIN': '#f7931a', 'SQLITE3': '#0ea5e9', 'HTML': '#e44d26', 'XML': '#f0a500',
+      'SCRIPT': '#8aca2b', 'PHP': '#8892be', 'MKV/WEBM': '#8338ec', 'MPEG': '#8338ec',
+      'MS-CFB': '#d62246', 'RTF': '#d62246', 'CLASS/FAT': '#ef233c',
+      'WOFF': '#9b5de5', 'WOFF2': '#9b5de5', 'ICO': '#2196f3', 'PSD': '#31a2f5', 'RIFF': '#0ea5e9',
+    };
+    function badgeStyle(type) {
+      const c = TYPE_COLORS[type] || '#4a4a6a';
+      return `background:${c}18;border:1.5px solid ${c}44;`;
+    }
+
+    function renderResult(data) {
+      const matchesHtml = data.matches && data.matches.length
+        ? data.matches.map(m => `
+        <div class="match">
+          <div class="match-badge" style="${badgeStyle(m.file_type)}">${esc(m.icon)}</div>
+          <div class="match-type">${esc(m.file_type)}</div>
+          <div class="match-desc">${esc(m.description)} &bull; <code style="font-size:.72rem;color:#7b61ff">${esc(m.extension)}</code></div>
+          <div class="match-hex">SIG @ +${m.offset}: <span>${esc(m.signature)}</span></div>
+        </div>`).join('')
+        : `<div class="unknown-msg">⚠️ No known file signature was found. The file may be plain text, proprietary, or corrupted.</div>`;
+
+      const embeddedHtml = data.embedded && data.embedded.length
+        ? `<div class="embedded-section">
+         <div class="embedded-title">⚠ Embedded / Appended Signatures (${data.embedded.length})</div>
+         ${data.embedded.map(e => `
+           <div class="embedded-item">
+             <span class="embedded-offset">${esc(e.offset_hex)}</span>
+             <span style="color:var(--text)">${esc(e.file_type)}</span>
+             <span style="color:var(--muted)">${esc(e.description)}</span>
+           </div>`).join('')}
+       </div>` : '';
+
+      return `
+    <div class="result-card">
+      <div class="card-header">
+        <div class="card-filename" title="${esc(data.filename)}">${esc(data.filename)}</div>
+        <div class="card-size">${fmtSize(data.size)}${data.truncated ? ' <span style="color:var(--warn)">(truncated)</span>' : ''}</div>
+      </div>
+      <div class="card-body">${matchesHtml}${embeddedHtml}</div>
+    </div>`;
+    }
+
+    async function processFiles(files) {
+      const resultsEl = document.getElementById('results');
+      const clearBtn = document.getElementById('clear-btn');
+      const summaryEl = document.getElementById('summary');
+      const progress = document.getElementById('progress');
+
+      resultsEl.style.display = 'block';
+      clearBtn.style.display = 'inline-block';
+      resultsEl.innerHTML = '';
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        progress.style.width = `${((i + 1) / files.length) * 100}%`;
+        summaryEl.innerHTML = `<span class="spinner"></span> Scanning ${file.name}…`;
+
+        const placeholder = document.createElement('div');
+        placeholder.innerHTML = `<div class="result-card"><div class="card-header"><div class="card-filename">${esc(file.name)}</div><div class="card-size">${fmtSize(file.size)}</div></div><div class="card-body" style="padding:20px 22px;font-family:var(--mono);font-size:.8rem;color:var(--muted)"><span class="spinner"></span> Analysing…</div></div>`;
+        resultsEl.appendChild(placeholder);
+
+        try {
+          const chunk = file.slice(0, CHUNK_SIZE);
+          const formData = new FormData();
+          formData.append('file', new File([chunk], file.name, { type: file.type }));
+          formData.append('total_size', file.size);
+
+          const resp = await fetch('/identify', { method: 'POST', body: formData });
+          if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+          const data = await resp.json();
+          placeholder.innerHTML = renderResult(data);
+        } catch (err) {
+          placeholder.innerHTML = `<div class="result-card"><div class="card-header"><div class="card-filename">${esc(file.name)}</div></div><div class="card-body"><div class="unknown-msg">⚠️ Error: ${esc(err.message)}</div></div></div>`;
+        }
+      }
+
+      summaryEl.textContent = `${files.length} file${files.length > 1 ? 's' : ''} scanned.`;
+      setTimeout(() => { progress.style.width = '0%'; }, 600);
+    }
+
+    function clearResults() {
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('clear-btn').style.display = 'none';
+      document.getElementById('summary').textContent = '';
+      document.getElementById('file-input').value = '';
+    }
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    dropzone.addEventListener('click', e => { if (!e.target.classList.contains('drop-btn')) fileInput.click(); });
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault(); dropzone.classList.remove('drag-over');
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length) processFiles(files);
+    });
+    fileInput.addEventListener('change', () => {
+      const files = Array.from(fileInput.files);
+      if (files.length) processFiles(files);
+    });
+  </script>
+</body>
+
+</html>
